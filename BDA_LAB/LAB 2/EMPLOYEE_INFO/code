@@ -1,0 +1,103 @@
+cqlsh:employee> create table Employee_info(
+            ... Emp_id int,
+            ... Emp_name text,
+            ... Designation text,
+            ... DOJ timestamp,
+            ... salary double,
+            ... Dept_name text,
+            ... primary key(Emp_id,salary)
+            ... );
+cqlsh:employee> begin batch
+            ... insert into Employee_info(Emp_id,Emp_name,Designation,DOJ,salary,Dept_name) values (111,'John','Assistant professor','2022-05-11',75000,'CSE')
+            ... insert into Employee_info(Emp_id,Emp_name,Designation,DOJ,salary,Dept_name) values (121,'Amber','Assistant professor','2022-05-11',85000,'CSE')
+            ... insert into Employee_info(Emp_id,Emp_name,Designation,DOJ,salary,Dept_name) values (131,'Mary','Associate professor','2022-05-11',95000,'ECE')
+            ... insert into Employee_info(Emp_id,Emp_name,Designation,DOJ,salary,Dept_name) values (141,'Jane','Associate professor','2022-05-11',105000,'ISE')
+            ... insert into Employee_info(Emp_id,Emp_name,Designation,DOJ,salary,Dept_name) values (151,'Yelena','Associate professor','2022-05-11',95000,'ISE')
+            ... apply batch;
+cqlsh:employee> select * from Employee_info;
+
+ emp_id | salary   | dept_name | designation         | doj                             | emp_name
+--------+----------+-----------+---------------------+---------------------------------+----------
+    111 |    75000 |       CSE | Assistant professor | 2022-05-10 18:30:00.000000+0000 |     John
+    151 |    95000 |       ISE | Associate professor | 2022-05-10 18:30:00.000000+0000 |   Yelena
+    121 |    85000 |       CSE | Assistant professor | 2022-05-10 18:30:00.000000+0000 |    Amber
+    141 | 1.05e+05 |       ISE | Associate professor | 2022-05-10 18:30:00.000000+0000 |     Jane
+    131 |    95000 |       ECE | Associate professor | 2022-05-10 18:30:00.000000+0000 |     Mary
+
+(5 rows)
+
+cqlsh:employee> update Employee_info set Emp_name = 'Josh', Dept_name = 'ECE' where Emp_id = 121 and salary = 85000;
+cqlsh:employee> select * from Employee_info;
+
+ emp_id | salary   | dept_name | designation         | doj                             | emp_name
+--------+----------+-----------+---------------------+---------------------------------+----------
+    111 |    75000 |       CSE | Assistant professor | 2022-05-10 18:30:00.000000+0000 |     John
+    151 |    95000 |       ISE | Associate professor | 2022-05-10 18:30:00.000000+0000 |   Yelena
+    121 |    85000 |       ECE | Assistant professor | 2022-05-10 18:30:00.000000+0000 |     Josh
+    141 | 1.05e+05 |       ISE | Associate professor | 2022-05-10 18:30:00.000000+0000 |     Jane
+    131 |    95000 |       ECE | Associate professor | 2022-05-10 18:30:00.000000+0000 |     Mary
+
+(5 rows)
+
+cqlsh:employee> select * from Employee_info where Emp_id in(111,121,131,141,151) order by salary desc;
+
+ emp_id | salary   | dept_name | designation         | doj                             | emp_name
+--------+----------+-----------+---------------------+---------------------------------+----------
+    141 | 1.05e+05 |       ISE | Associate professor | 2022-05-10 18:30:00.000000+0000 |     Jane
+    131 |    95000 |       ECE | Associate professor | 2022-05-10 18:30:00.000000+0000 |     Mary
+    151 |    95000 |       ISE | Associate professor | 2022-05-10 18:30:00.000000+0000 |   Yelena
+    121 |    85000 |       ECE | Assistant professor | 2022-05-10 18:30:00.000000+0000 |     Josh
+    111 |    75000 |       CSE | Assistant professor | 2022-05-10 18:30:00.000000+0000 |     John
+
+(5 rows)
+cqlsh:employee> select * from Employee_info where Emp_id in(111,121,131,141,151) order by salary asc;
+
+ emp_id | salary   | dept_name | designation         | doj                             | emp_name
+--------+----------+-----------+---------------------+---------------------------------+----------
+    111 |    75000 |       CSE | Assistant professor | 2022-05-10 18:30:00.000000+0000 |     John
+    121 |    85000 |       ECE | Assistant professor | 2022-05-10 18:30:00.000000+0000 |     Josh
+    131 |    95000 |       ECE | Associate professor | 2022-05-10 18:30:00.000000+0000 |     Mary
+    151 |    95000 |       ISE | Associate professor | 2022-05-10 18:30:00.000000+0000 |   Yelena
+    141 | 1.05e+05 |       ISE | Associate professor | 2022-05-10 18:30:00.000000+0000 |     Jane
+
+(5 rows)
+
+cqlsh:employee> update Employee_info set project = project+{'AI','Data warehouse'} where Emp_id = 111 and salary = 75000;
+cqlsh:employee> update Employee_info set project = project+{'IOT','Data warehouse'} where Emp_id = 121 and salary = 85000;
+cqlsh:employee> update Employee_info set project = project+{'IOT','AI'} where Emp_id = 131 and salary = 95000;
+cqlsh:employee> update Employee_info set project = project+{'IOT','machine learning'} where Emp_id = 141 and salary = 95000;
+cqlsh:employee> update Employee_info set project = project+{'IOT','data science'} where Emp_id = 141 and salary = 105000;
+cqlsh:employee> select * from Employee_info;
+
+ emp_id | salary   | dept_name | designation         | doj                             | emp_name | project
+--------+----------+-----------+---------------------+---------------------------------+----------+-----------------------------
+    111 |    75000 |       CSE | Assistant professor | 2022-05-10 18:30:00.000000+0000 |     John |    {'AI', 'Data warehouse'}
+    151 |    95000 |       ISE | Associate professor | 2022-05-10 18:30:00.000000+0000 |   Yelena |                        null
+    121 |    85000 |       ECE | Assistant professor | 2022-05-10 18:30:00.000000+0000 |     Josh |   {'Data warehouse', 'IOT'}
+    141 |    95000 |      null |                null |                            null |     null | {'IOT', 'machine learning'}
+    141 | 1.05e+05 |       ISE | Associate professor | 2022-05-10 18:30:00.000000+0000 |     Jane |     {'IOT', 'data science'}
+    131 |    95000 |       ECE | Associate professor | 2022-05-10 18:30:00.000000+0000 |     Mary |               {'AI', 'IOT'}
+
+(6 rows)
+cqlsh:employee> update Employee_info set project = project+{'IOT','AI'} where Emp_id = 151 and salary = 95000;
+cqlsh:employee> select * from Employee_info;
+
+ emp_id | salary   | dept_name | designation         | doj                             | emp_name | project
+--------+----------+-----------+---------------------+---------------------------------+----------+-----------------------------
+    111 |    75000 |       CSE | Assistant professor | 2022-05-10 18:30:00.000000+0000 |     John |    {'AI', 'Data warehouse'}
+    151 |    95000 |       ISE | Associate professor | 2022-05-10 18:30:00.000000+0000 |   Yelena |               {'AI', 'IOT'}
+    121 |    85000 |       ECE | Assistant professor | 2022-05-10 18:30:00.000000+0000 |     Josh |   {'Data warehouse', 'IOT'}
+    141 |    95000 |      null |                null |                            null |     null | {'IOT', 'machine learning'}
+    141 | 1.05e+05 |       ISE | Associate professor | 2022-05-10 18:30:00.000000+0000 |     Jane |     {'IOT', 'data science'}
+    131 |    95000 |       ECE | Associate professor | 2022-05-10 18:30:00.000000+0000 |     Mary |               {'AI', 'IOT'}
+
+(6 rows)
+
+cqlsh:employee> insert into Employee_info(Emp_id,Emp_name,Designation,DOJ,salary,Dept_name) values (161,'Ryan','Associate professor','2022-05-11',95000,'ISE') using ttl 60;
+cqlsh:employee> select ttl(Emp_name) from Employee_info where Emp_id = 161 and salary = 95000;
+
+ ttl(emp_name)
+---------------
+            53
+
+(1 rows)
